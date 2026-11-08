@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#11131b">
+  <title>LayarKita — Pesan Tiket Bioskop</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #11131b;
+      --surface: #191c27;
+      --surface-raised: #202431;
+      --muted: #9da3b4;
+      --text: #f5f5f7;
+      --accent: #ffb84d;
+      --accent-strong: #ff9638;
+      --line: #303443;
+      --green: #83d6ac;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      min-width: 320px;
+      color: #F4F1EC;
+      background:
+        radial-gradient(ellipse 60% 55% at 50% -5%, rgba(229,56,59,.38), transparent 70%),
+        radial-gradient(ellipse 45% 40% at 85% 100%, rgba(60,50,140,.35), transparent 70%),
+        linear-gradient(180deg, #0A0B12, #07080D);
+      background-attachment: fixed;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; }
+    .shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar { height: 76px; border-bottom: 1px solid rgba(255,255,255,.07); }
+    .topbar-inner { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-size: 19px; font-weight: 800; letter-spacing: -.5px; }
+    .brand img { display: block; width: 112px; height: 56px; border-radius: 8px; background: #faf9f6; object-fit: contain; }
+    .nav { display: flex; gap: 28px; align-items: center; color: var(--muted); font-size: 13px; }
+    .nav button, .text-button { padding: 8px 0; border: 0; background: none; color: inherit; cursor: pointer; }
+    .nav button:hover, .nav button.active { color: var(--text); }
+    .profile { display: flex; align-items: center; gap: 10px; color: #d3d5df; font-size: 12px; }
+    .avatar { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid #49414a; border-radius: 50%; background: #38313a; color: var(--accent); font-weight: 700; }
+    main { min-height: calc(100vh - 140px); padding: 46px 0 76px; }
+    .screen[hidden] { display: none; }
+    .eyebrow { color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 12px; font-size: clamp(36px, 5vw, 56px); letter-spacing: -2.6px; line-height: 1.03; }
+    h2 { margin-bottom: 8px; font-size: 26px; letter-spacing: -.7px; }
+    .muted { color: var(--muted); }
+    .hero { display: grid; grid-template-columns: 1fr 250px; gap: 30px; align-items: end; padding: 22px 0 38px; }
+    .hero-copy { max-width: 630px; }
+    .hero-copy p { margin-bottom: 0; color: var(--muted); font-size: 15px; line-height: 1.7; }
+    .search { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--muted); }
+    .search svg { flex: 0 0 auto; width: 17px; }
+    .search input { width: 100%; border: 0; outline: 0; color: var(--text); background: transparent; font-size: 13px; }
+    .search input::placeholder { color: #858b9d; }
+    .section-heading { display: flex; justify-content: space-between; align-items: end; gap: 15px; margin-bottom: 20px; }
+    .section-heading h2 { margin-bottom: 4px; font-size: 21px; }
+    .section-heading p { margin: 0; color: var(--muted); font-size: 12px; }
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 22px; }
+    .chip { padding: 8px 13px; border: 1px solid var(--line); border-radius: 99px; background: transparent; color: #b7bbca; font-size: 12px; cursor: pointer; }
+    .chip:hover, .chip.selected { border-color: var(--accent); background: rgba(255,184,77,.12); color: var(--accent); }
+    .movie-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 17px; }
+    .venue-panel { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-top: 42px; padding: 22px; border: 1px solid var(--line); border-radius: 15px; background: linear-gradient(120deg, rgba(229,56,59,.12), rgba(60,50,140,.12)); }
+    .venue-panel h2 { margin: 5px 0; font-size: 19px; }
+    .venue-panel p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .venue-panel .eyebrow { color: var(--accent); font-size: 10px; }
+    .venue-button { flex: 0 0 auto; padding: 10px 14px; border: 1px solid #494252; border-radius: 9px; background: rgba(15,17,24,.55); color: var(--text); font-size: 12px; cursor: pointer; }
+    .venue-button:hover { border-color: var(--accent); color: var(--accent); }
+    .movie-card { overflow: hidden; border: 1px solid #2b2f3c; border-radius: 16px; background: var(--surface); transition: transform .18s ease, border-color .18s ease; }
+    .movie-card:hover { transform: translateY(-4px); border-color: #55505a; }
+    .poster { position: relative; min-height: 248px; overflow: hidden; background: #222532; }
+    .poster-image { display: block; width: 100%; height: 100%; min-height: inherit; position: absolute; inset: 0; object-fit: cover; }
+    .rating { position: absolute; top: 13px; left: 13px; padding: 6px 8px; border-radius: 7px; background: rgba(15,17,24,.76); font-size: 11px; font-weight: 700; }
+    .rating b { color: var(--accent); }
+    .movie-info { padding: 14px 14px 15px; }
+    .movie-meta { display: flex; justify-content: space-between; gap: 8px; align-items: center; color: var(--muted); font-size: 11px; }
+    .movie-info h3 { margin: 0 0 8px; font-size: 15px; letter-spacing: -.2px; }
+    .card-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+    .price { color: var(--accent); font-size: 13px; font-weight: 750; }
+    .arrow-button { width: 32px; height: 32px; border: 1px solid #46404a; border-radius: 10px; background: #282632; color: var(--accent); cursor: pointer; }
+    .arrow-button:hover { background: var(--accent); color: #17130e; }
+    .empty { grid-column: 1/-1; padding: 40px; border: 1px dashed var(--line); border-radius: 14px; color: var(--muted); text-align: center; }
+    .back-link { display: inline-flex; gap: 8px; align-items: center; margin-bottom: 25px; padding: 5px 0; border: 0; background: none; color: var(--muted); font-size: 13px; cursor: pointer; }
+    .back-link:hover { color: var(--text); }
+    .detail-layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(270px, .8fr); gap: 28px; align-items: start; }
+    .detail-poster { position: relative; min-height: 375px; overflow: hidden; border: 1px solid #353441; border-radius: 18px; background: #222532; }
+    .detail-poster img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+    .detail-copy { padding: 5px 0; }
+    .detail-copy h1 { margin: 8px 0 10px; font-size: 34px; letter-spacing: -1.2px; }
+    .detail-copy > p { color: #b4b8c5; font-size: 13px; line-height: 1.8; }
+    .detail-facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 17px 0 22px; }
+    .fact { padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; color: #c4c7d2; font-size: 11px; }
+    .detail-copy h3 { margin: 21px 0 12px; font-size: 13px; }
+    .showtimes { display: flex; flex-wrap: wrap; gap: 8px; }
+    .showtime { min-width: 74px; padding: 10px 11px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); color: #d5d7df; font-size: 12px; cursor: pointer; }
+    .showtime:hover, .showtime.selected { border-color: var(--accent); color: var(--accent); background: rgba(255,184,77,.1); }
+    .primary { display: inline-flex; width: 100%; min-height: 46px; justify-content: center; align-items: center; gap: 9px; margin-top: 22px; padding: 12px 18px; border: 0; border-radius: 10px; background: var(--accent); color: #21180d; font-size: 13px; font-weight: 800; cursor: pointer; transition: background .15s, transform .15s; }
+    .primary:hover { transform: translateY(-1px); background: #ffc96e; }
+    .primary:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+    .booking-head { display: flex; justify-content: space-between; align-items: start; gap: 20px; margin-bottom: 25px; }
+    .booking-head h1 { font-size: 34px; letter-spacing: -1.2px; }
+    .stepper { display: flex; gap: 7px; align-items: center; margin-top: 12px; color: #858b9c; font-size: 11px; }
+    .step { display: inline-flex; align-items: center; gap: 7px; }
+    .step b { display: grid; width: 23px; height: 23px; place-items: center; border: 1px solid #414553; border-radius: 50%; font-size: 10px; }
+    .step.current { color: var(--accent); }
+    .step.current b, .step.done b { border-color: var(--accent); background: var(--accent); color: #1b150e; }
+    .step-line { width: 24px; height: 1px; background: #414553; }
+    .booking-layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(300px, .8fr); gap: 20px; align-items: start; }
+    .panel { padding: 22px; border: 1px solid var(--line); border-radius: 15px; background: var(--surface); }
+    .panel h2 { margin-bottom: 6px; font-size: 17px; }
+    .panel-note { margin: 0; color: var(--muted); font-size: 12px; }
+    .screen-label { width: min(310px, 75%); margin: 28px auto 23px; padding: 7px; border-top: 3px solid #f1b85f; border-radius: 50% 50% 0 0 / 20px 20px 0 0; color: #ffd490; font-size: 10px; letter-spacing: 3px; text-align: center; box-shadow: 0 -7px 20px rgba(255,184,77,.08); }
+    .seat-grid { display: grid; grid-template-columns: repeat(9, minmax(24px, 1fr)); gap: 9px 7px; max-width: 360px; margin: 0 auto; }
+    .seat { min-width: 25px; aspect-ratio: 1.1; border: 1px solid #4a5060; border-radius: 7px 7px 4px 4px; background: #282e3a; color: #d0d4df; font-size: 9px; cursor: pointer; }
+    .seat:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .seat.selected { border-color: var(--accent); background: var(--accent); color: #25190b; font-weight: 800; }
+    .seat:disabled { border-color: #30333d; background: #252831; color: #5b5f6b; cursor: not-allowed; }
+    .aisle { visibility: hidden; }
+    .seat-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-top: 22px; color: var(--muted); font-size: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-square { width: 14px; height: 14px; border: 1px solid #4a5060; border-radius: 4px; background: #282e3a; }
+    .legend-square.taken { border-color: #30333d; background: #252831; }
+    .legend-square.chosen { border-color: var(--accent); background: var(--accent); }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+    .field { display: grid; gap: 7px; }
+    .field.full { grid-column: 1/-1; }
+    .field label { color: #c8cbd5; font-size: 11px; font-weight: 650; }
+    .field input { width: 100%; height: 42px; padding: 0 12px; border: 1px solid #383d4b; border-radius: 8px; outline: 0; background: #141720; color: var(--text); font-size: 12px; }
+    .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,184,77,.1); }
+    .field input::placeholder { color: #707687; }
+    .summary-row { display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid #303441; color: var(--muted); font-size: 12px; }
+    .summary-row strong { color: #e6e7ed; font-size: 12px; font-weight: 650; text-align: right; }
+    .summary-total { margin-top: 5px; padding-top: 15px; border-bottom: 0; color: #e6e7ed; }
+    .summary-total strong { color: var(--accent); font-size: 18px; }
+    .summary-help { margin: 14px 0 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .form-error { min-height: 16px; margin: 9px 0 0; color: #ff9a8b; font-size: 11px; }
+    .ticket-wrap { max-width: 720px; margin: 0 auto; }
+    .success-heading { margin: 12px 0 25px; text-align: center; }
+    .success-icon { display: grid; width: 58px; height: 58px; place-items: center; margin: 0 auto 15px; border: 1px solid rgba(131,214,172,.35); border-radius: 50%; background: rgba(131,214,172,.12); color: var(--green); font-size: 27px; }
+    .success-heading h1 { margin-bottom: 9px; font-size: 34px; letter-spacing: -1.2px; }
+    .success-heading p { margin: 0; color: var(--muted); font-size: 13px; }
+    .ticket { display: grid; grid-template-columns: 1fr 190px; overflow: hidden; border: 1px solid #3a3b46; border-radius: 17px; background: var(--surface); }
+    .ticket-main { padding: 25px; }
+    .ticket-top { display: flex; justify-content: space-between; gap: 14px; align-items: start; padding-bottom: 19px; border-bottom: 1px dashed #454957; }
+    .ticket-top h2 { margin: 5px 0 6px; font-size: 22px; }
+    .ticket-top p { margin: 0; color: var(--muted); font-size: 11px; }
+    .ticket-badge { padding: 7px 9px; border-radius: 8px; background: rgba(131,214,172,.12); color: var(--green); font-size: 10px; font-weight: 750; white-space: nowrap; }
+    .ticket-data { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 14px; padding: 21px 0; }
+    .ticket-data span, .ticket-qr span { display: block; margin-bottom: 5px; color: var(--muted); font-size: 10px; }
+    .ticket-data strong { font-size: 12px; font-weight: 650; }
+    .ticket-code { padding-top: 15px; border-top: 1px dashed #454957; color: var(--muted); font-size: 10px; }
+    .ticket-code strong { margin-left: 6px; color: #e7e8ee; letter-spacing: 1.5px; }
+    .ticket-qr { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; padding: 22px 14px; border-left: 1px dashed #454957; background: #1e212d; text-align: center; }
+    .ticket-qr span { margin: 0; line-height: 1.5; }
+    .qr-code { display: grid; width: 105px; height: 105px; padding: 7px; grid-template-columns: repeat(11, 1fr); gap: 2px; border-radius: 5px; background: #f1f0eb; }
+    .qr-code i { border-radius: 1px; background: #f1f0eb; }
+    .qr-code i.on { background: #161820; }
+    .ticket-actions { display: flex; justify-content: center; gap: 10px; margin-top: 19px; }
+    .secondary { min-height: 42px; padding: 10px 15px; border: 1px solid #444959; border-radius: 9px; background: transparent; color: #d5d7df; font-size: 12px; cursor: pointer; }
+    .secondary:hover { border-color: var(--accent); color: var(--accent); }
+    footer { padding: 21px 0; border-top: 1px solid rgba(255,255,255,.07); color: #777e8f; font-size: 10px; }
+    footer .shell { display: flex; justify-content: space-between; gap: 15px; }
+    @media (max-width: 850px) {
+      .movie-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .booking-layout { grid-template-columns: 1fr; }
+      .booking-layout > .panel:last-child { order: -1; }
+      .detail-layout { grid-template-columns: 1fr; }
+      .detail-poster { min-height: 300px; }
+      .hero { grid-template-columns: 1fr; }
+      .search { max-width: 440px; }
+      .venue-panel { align-items: flex-start; flex-direction: column; }
+    }
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 28px, 1120px); }
+      .topbar { height: 64px; }
+      .nav { gap: 13px; font-size: 11px; }
+      .nav button:nth-child(2) { display: none; }
+      .profile > span { display: none; }
+      main { padding: 31px 0 55px; }
+      .hero { padding: 16px 0 29px; }
+      .hero-copy p { font-size: 13px; }
+      .movie-grid { gap: 10px; }
+      .poster { min-height: 195px; }
+      .movie-info { padding: 12px 10px; }
+      .movie-info h3 { font-size: 13px; }
+      .movie-meta { font-size: 10px; }
+      .detail-poster { min-height: 250px; }
+      .booking-head { flex-direction: column; }
+      .panel { padding: 17px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+      .ticket { grid-template-columns: 1fr; }
+      .ticket-main { padding: 19px; }
+      .ticket-qr { border-top: 1px dashed #454957; border-left: 0; }
+      .ticket-data { gap: 16px 9px; }
+      footer .shell { flex-direction: column; }
+    }
+    @media print {
+      body { background: #fff; color: #111; }
+      .topbar, footer, .ticket-actions, .success-heading { display: none !important; }
+      main { min-height: 0; padding: 0; }
+      .ticket { border-color: #aaa; background: #fff; color: #111; }
+      .ticket-qr { background: #f4f4f4; }
+      .ticket-data strong, .ticket-top h2, .ticket-code strong { color: #111; }
+      .ticket-data span, .ticket-top p, .ticket-code, .ticket-qr span { color: #555; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="#" data-go="catalog" aria-label="Hapiz, halaman utama">
+        <img src="public/images/Logo%20Hapiz%401x.png" alt="Hapiz">
+      </a>
+      <nav class="nav" aria-label="Navigasi utama">
+        <button class="active" type="button" data-go="catalog">Film</button>
+        <button type="button" data-scroll="venue-info">Bioskop</button>
+      </nav>
+      <div class="profile"><span class="avatar" aria-hidden="true">H</span><span>Pengunjung</span></div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="screen" id="catalog-screen" aria-labelledby="catalog-title">
+      <div class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Malam ini, di layar lebar</p>
+          <h1 id="catalog-title">Cerita seru,<br>kursi terbaik.</h1>
+          <p>Pilih film, tentukan jadwal, dan pesan kursimu dalam beberapa langkah mudah.</p>
+        </div>
+        <label class="search">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input id="movie-search" type="search" placeholder="Cari judul film..." aria-label="Cari judul film">
+        </label>
+      </div>
+      <div class="section-heading">
+        <div><h2>Sedang tayang</h2><p>Temukan tontonan favoritmu minggu ini.</p></div>
+        <span class="muted" id="movie-count" aria-live="polite"></span>
+      </div>
+      <div class="filters" aria-label="Filter genre">
+        <button class="chip selected" type="button" data-genre="Semua">Semua film</button>
+        <button class="chip" type="button" data-genre="Petualangan">Petualangan</button>
+        <button class="chip" type="button" data-genre="Drama">Drama</button>
+        <button class="chip" type="button" data-genre="Fiksi Ilmiah">Fiksi ilmiah</button>
+        <button class="chip" type="button" data-genre="Animasi">Animasi</button>
+        <button class="chip" type="button" data-genre="Horor">Horor</button>
+      </div>
+      <div class="movie-grid" id="movie-grid"></div>
+      <section class="venue-panel" id="venue-info" aria-labelledby="venue-title">
+        <div>
+          <p class="eyebrow">Lokasi bioskop</p>
+          <h2 id="venue-title">LayarKita Central</h2>
+          <p>Studio 2 · Contoh lokasi untuk simulasi pemesanan.<br>Jadwal dan ketersediaan kursi pada prototipe ini bersifat demo.</p>
+        </div>
+        <button class="venue-button" type="button" data-scroll="catalog-title">Kembali ke katalog</button>
+      </section>
+    </section>
+
+    <section class="screen" id="detail-screen" hidden aria-labelledby="detail-title">
+      <button class="back-link" type="button" data-go="catalog"><span aria-hidden="true">←</span> Kembali ke katalog</button>
+      <div class="detail-layout">
+        <div class="detail-poster">
+          <img id="detail-poster-image" alt="">
+        </div>
+        <div class="detail-copy">
+          <p class="eyebrow">Rincian film</p>
+          <h1 id="detail-title"></h1>
+          <p id="detail-description"></p>
+          <div class="detail-facts" id="detail-facts"></div>
+          <h3>Pilih tanggal</h3>
+          <div class="showtimes" id="dates"></div>
+          <h3>Pilih jam tayang</h3>
+          <div class="showtimes" id="times"></div>
+          <button class="primary" id="continue-to-booking" type="button" disabled>Pilih kursi <span aria-hidden="true">→</span></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="booking-screen" hidden aria-labelledby="booking-title">
+      <button class="back-link" type="button" data-go="detail"><span aria-hidden="true">←</span> Kembali ke rincian film</button>
+      <div class="booking-head">
+        <div><p class="eyebrow">Satu langkah lagi</p><h1 id="booking-title">Pesan kursimu.</h1><p class="muted" id="booking-subtitle"></p></div>
+        <div class="stepper" aria-label="Langkah 2 dari 3">
+          <span class="step done"><b>1</b> Film</span><i class="step-line"></i><span class="step current"><b>2</b> Kursi</span><i class="step-line"></i><span class="step"><b>3</b> Tiket</span>
+        </div>
+      </div>
+      <form id="booking-form" novalidate>
+        <div class="booking-layout">
+          <section class="panel" aria-labelledby="seat-heading">
+            <h2 id="seat-heading">Pilih kursi</h2>
+            <p class="panel-note">Klik kursi yang masih tersedia. Maksimal 6 kursi per pemesanan.</p>
+            <div class="screen-label">LAYAR</div>
+            <div class="seat-grid" id="seat-grid" aria-label="Peta kursi bioskop"></div>
+            <div class="seat-legend">
+              <span class="legend-item"><i class="legend-square"></i>Tersedia</span>
+              <span class="legend-item"><i class="legend-square chosen"></i>Dipilih</span>
+              <span class="legend-item"><i class="legend-square taken"></i>Terisi</span>
+            </div>
+            <p class="form-error" id="seat-error" aria-live="polite"></p>
+            <h2 style="margin-top:24px">Data pemesan</h2>
+            <p class="panel-note">E-tiket akan dikirim menggunakan informasi ini.</p>
+            <div class="form-grid">
+              <div class="field"><label for="customer-name">Nama lengkap</label><input id="customer-name" name="name" autocomplete="name" placeholder="Contoh: Nadia Putri" required minlength="3"></div>
+              <div class="field"><label for="customer-email">Alamat email</label><input id="customer-email" name="email" type="email" autocomplete="email" placeholder="nama@email.com" required></div>
+              <div class="field full"><label for="customer-phone">Nomor telepon</label><input id="customer-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="08xxxxxxxxxx" pattern="\+?[0-9][0-9 ]{7,16}" required></div>
+            </div>
+            <p class="form-error" id="form-error" aria-live="polite"></p>
+          </section>
+          <aside class="panel" aria-labelledby="order-heading">
+            <h2 id="order-heading">Ringkasan pesanan</h2>
+            <p class="panel-note">Periksa pilihanmu sebelum melanjutkan.</p>
+            <div class="summary-row"><span>Film</span><strong id="order-movie">—</strong></div>
+            <div class="summary-row"><span>Bioskop</span><strong>LayarKita Central</strong></div>
+            <div class="summary-row"><span>Jadwal</span><strong id="order-schedule">—</strong></div>
+            <div class="summary-row"><span>Kursi</span><strong id="order-seats">Belum dipilih</strong></div>
+            <div class="summary-row"><span id="order-quantity">Tiket (0)</span><strong id="order-subtotal">Rp0</strong></div>
+            <div class="summary-row"><span>Biaya layanan</span><strong id="order-fee">Rp0</strong></div>
+            <div class="summary-row summary-total"><span>Total pembayaran</span><strong id="order-total">Rp0</strong></div>
+            <button class="primary" id="submit-booking" type="submit">Buat e-tiket <span aria-hidden="true">→</span></button>
+            <p class="summary-help">Ini adalah simulasi tugas kuliah. Tidak ada pembayaran sungguhan.</p>
+          </aside>
+        </div>
+      </form>
+    </section>
+
+    <section class="screen ticket-wrap" id="ticket-screen" hidden aria-labelledby="ticket-heading">
+      <div class="success-heading">
+        <div class="success-icon" aria-hidden="true">✓</div>
+        <p class="eyebrow">Berhasil dipesan</p>
+        <h1 id="ticket-heading">Siap untuk menonton!</h1>
+        <p>Simpan e-tiket ini dan tunjukkan saat tiba di bioskop.</p>
+      </div>
+      <article class="ticket" aria-label="E-tiket bioskop">
+        <div class="ticket-main">
+          <div class="ticket-top">
+            <div><p class="eyebrow">LayarKita · E-Tiket</p><h2 id="ticket-movie"></h2><p id="ticket-venue"></p></div>
+            <span class="ticket-badge">TERKONFIRMASI</span>
+          </div>
+          <div class="ticket-data">
+            <div><span>Nama pemesan</span><strong id="ticket-name"></strong></div>
+            <div><span>Tanggal</span><strong id="ticket-date"></strong></div>
+            <div><span>Jam tayang</span><strong id="ticket-time"></strong></div>
+            <div><span>Nomor kursi</span><strong id="ticket-seats"></strong></div>
+            <div><span>Jumlah tiket</span><strong id="ticket-quantity"></strong></div>
+            <div><span>Total</span><strong id="ticket-total"></strong></div>
+          </div>
+          <div class="ticket-code">Kode pemesanan <strong id="ticket-code"></strong></div>
+        </div>
+        <div class="ticket-qr"><div class="qr-code" id="qr-code" aria-label="Ilustrasi kode tiket"></div><span>Kode ilustrasi<br>untuk keperluan demo</span></div>
+      </article>
+      <div class="ticket-actions">
+        <button class="secondary" id="print-ticket" type="button">Cetak e-tiket</button>
+        <button class="primary" id="new-booking" type="button" style="width:auto;min-width:175px;margin:0">Pesan film lain</button>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="shell"><span>© 2026 LayarKita · Proyek pembelajaran sistem pemesanan tiket.</span><span>Simulasi antarmuka — bukan layanan transaksi nyata.</span></div></footer>
+
+  <script src="resources/js/app.js"></script>
+</body>
+</html>

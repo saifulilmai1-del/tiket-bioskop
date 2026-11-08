@@ -1,0 +1,18 @@
+:root {
+  --color-background: #11131b;
+  --color-surface: #191c27;
+  --color-text: #f5f5f7;
+  --color-muted: #9da3b4;
+  --color-accent: #ffb84d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: system-ui, sans-serif;
+}
